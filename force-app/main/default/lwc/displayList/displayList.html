@@ -1,0 +1,34 @@
+<template>
+
+    <lightning-card title="Child to Parent">
+        <li>{burn}</li>
+        <c-display-list-child onburn={changeHandler} bb={bb}></c-display-list-child>
+
+    </lightning-card>
+
+    <lightning-card title="Wire AccountList">
+        <template if:true={aL.data}>
+            <template for:each={aL.data} for:item="a">
+                <li key={a.Id}>
+                    
+                    <lightning-button label={a.Name} onclick={viewRecord} value={a.Id} >
+                    </lightning-button>
+                </li>
+            </template>
+        </template>
+    </lightning-card>
+
+    <lightning-card title="Connected Callback AccountList">
+        <template if:true={err}>
+            {err.message}
+        </template>
+        <template if:true={aList}>
+            <template for:each={aList} for:item="a">
+                <li key={a.Id}>
+                    {a.Name}
+                </li>
+            </template>
+        </template>
+    </lightning-card>
+
+</template>

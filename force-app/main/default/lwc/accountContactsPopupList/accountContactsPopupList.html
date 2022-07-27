@@ -1,0 +1,38 @@
+<!-- sldsValidatorIgnore -->
+<template>
+    <lightning-card title="LWC Record Id Example " >
+        <div style="height: 300px">
+        <lightning-datatable 
+        data={aL.data} 
+        columns={cA} 
+        key-field="Id"
+        hide-checkbox-column
+        onrowaction={handleRowSelect}
+        draft-values={df}
+        onsave={handleSave}>
+        </lightning-datatable></div>
+    </lightning-card>
+
+        <template if:true={showModal}>
+            <section aria-modal="true" class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container ">
+                    <header class="slds-modal__header">
+                        <h2 class="slds-text-heading_small">{bb} Related List of Contacts </h2>
+                        <lightning-icon class="slds-modal__close" icon-name="utility:close" size="small" onclick={closeModal}></lightning-icon>
+                    </header>
+                    <div class="slds-modal__content">
+                            <lightning-datatable 
+                            data={cL} 
+                            columns={cC} 
+                            key-field="Id"
+                            ></lightning-datatable>
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <lightning-button variant="brand" label="Cancel" onclick={closeModal} class="slds-p-around_x-small"></lightning-button>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+
+</template>

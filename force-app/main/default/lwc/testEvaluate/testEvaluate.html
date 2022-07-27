@@ -1,0 +1,27 @@
+<!-- sldsValidatorIgnore -->
+<template>
+    <lightning-button variant="brand" label="What is Modal/PopUp in LWC?" onclick={openModal} >
+    </lightning-button>
+    
+    <template if:true={isModalOpen}>
+        <!-- Modal/Popup Box LWC starts here -->
+        <section role="dialog" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_brand slds-modal__close" title="Close" onclick={closeModal}>close</button>
+                    <h2 class="slds-text-heading_medium">Modal/PopUp Box header LWC</h2>
+                </header>
+                
+                <div class="slds-modal__content" >
+                    fffffffffffffuuuuuuuuuuuuuuuuuucccccccccccccccccccccccckkkkkkkkkkkkkkkkkkk
+                </div>
+                
+                <footer class="slds-modal__footer">
+                    <button onclick={submitDetails} title="OK" class="slds-button slds-button_brand">OK</button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+ </template>

@@ -1,0 +1,13 @@
+<template>
+    <lightning-card title="Record Type">
+        <template if:true={rec.data}>
+            <template for:each={rec.data} for:item="rec">
+                <li key={rec.DeveloperName}>
+                    
+                    <lightning-button label={rec.Name} onclick={viewRecord} value={rec.DeveloperName} >
+                    </lightning-button>
+                </li>
+            </template>
+        </template>
+    </lightning-card>
+</template>

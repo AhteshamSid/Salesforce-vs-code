@@ -1,0 +1,19 @@
+<!-- sldsValidatorIgnore -->
+<template>
+    <lightning-card title="Tasks Related to Accounts " >
+        <lightning-datatable 
+        data={aT} 
+        columns={cC} 
+        key-field="Id"
+        hide-checkbox-column>
+        </lightning-datatable>
+    </lightning-card>
+    <lightning-card title="Events Related to Accounts " >
+        <lightning-datatable 
+        data={aE.data} 
+        columns={cC} 
+        key-field="Id"
+        hide-checkbox-column>
+        </lightning-datatable>
+    </lightning-card>
+</template>

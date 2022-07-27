@@ -1,0 +1,49 @@
+<template>
+
+
+
+    <lightning-card title="Attachments" icon-name="custom:custom14" >
+        <template if:true={ttValues.data}>
+            <lightning-combobox name="progress" label="Document Type" value={value} 
+                options={ttValues.data.values} onchange={handleChange} class="slds-var-p-around_small">
+            </lightning-combobox>
+        </template>
+
+
+
+        <lightning-file-upload class="slds-align_absolute-center"
+            label="Add files"
+            name="fileUploader"
+            accept={acceptedFormats}
+            record-id={recordId}
+            file-field-name="tt_fileupload__c"
+            file-field-value={value}
+            onuploadfinished={refershLwc}
+            multiple>
+        </lightning-file-upload>
+
+
+
+
+        <lightning-card title="Uploaded file list" icon-name="custom:custom96" class="slds-var-p-around_small">
+            <template for:each={uploadFile.data} for:item="f">
+                <lightning-layout-item key={f.Id} size="3" class="slds-var-p-around_x-small">
+                    <!-- <lightning-button label={f.Title} onclick={navigateToFiles} 
+                    value={f.ContentDocumentId} >
+                    </lightning-button> -->
+                    <div class="slds-var-p-vertical_x-small slds-p-left_medium">
+                        <a onclick={navigateToFiles}  data-value={f.ContentDocumentId} >
+                            {f.Title} <br/> 
+                            <lightning-formatted-date-time value={f.CreatedDate} year="numeric" month="numeric" day="numeric" hour="2-digit"
+                                        minute="2-digit" hour12="true" ></lightning-formatted-date-time>
+                             . {f.ContentSize}Byte . {f.FileExtension}
+                        </a>
+                      </div>
+            </lightning-layout-item>
+            </template>
+        </lightning-card>
+    
+
+
+    </lightning-card>
+</template>

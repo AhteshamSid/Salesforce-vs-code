@@ -1,0 +1,37 @@
+<!-- sldsValidatorIgnore -->
+<template>
+    <!-- <select class="slds-select" id="select-01">
+        <template for:each = {rL.data} for:item="r">
+           <option key={r.Id} value={r.Id}>{r.DeveloperName}</option>
+        </template>
+   </select> -->
+   
+
+    <lightning-button class="slds-m-around_medium" label="New Case" onclick={navigateToNewCase}></lightning-button>
+
+
+    <lightning-button class="slds-m-around_medium" label="New Opp"
+    onclick={handlePopIn}></lightning-button>
+
+
+<template if:true={f1}>
+    <section aria-modal="true" class="slds-modal slds-fade-in-open">
+        <div class="slds-modal__container ">
+                <lightning-icon class="slds-modal__close" icon-name="utility:close" variant="inverse" onclick={handlePopOut}></lightning-icon>
+            <div class="slds-modal__content">
+
+                <div class="slds-align_absolute-center">
+                <lightning-radio-group
+                label="RecordType"
+                options={getrL}
+                value={value}
+                onchange={handleChange}
+                >
+                </lightning-radio-group></div>
+            </div>
+        </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+</template>
+      
+</template>
