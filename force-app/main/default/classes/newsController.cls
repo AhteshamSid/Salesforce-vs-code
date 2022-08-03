@@ -2,7 +2,7 @@ public with sharing class newsController {
     @AuraEnabled
     public static Map<String, Object> retriveNews(){
         HttpRequest httpRequest = new HttpRequest();
-        httpRequest.setEndpoint('http://newsapi.org/v2/top-headlines?country=in&category=entertainment&apiKey=bcd89bcc13e94b70b9ddf1d28f8de0fb');
+        httpRequest.setEndpoint('http://newsapi.org/v2/top-headlines?language=en&apiKey=bcd89bcc13e94b70b9ddf1d28f8de0fb');
         httpRequest.setMethod('GET');
 
         Map<String, Object> newsJsonData = new Map<String, Object>();
@@ -13,6 +13,7 @@ public with sharing class newsController {
             HttpResponse httpResponse = http.send(httpRequest);
             if(httpResponse.getStatusCode() == 200){
                 strResponse = httpResponse.getBody();
+                system.debug(strResponse);
             } else {
                 throw new CalloutException(httpResponse.getBody());
             }
@@ -25,6 +26,7 @@ public with sharing class newsController {
             newsJsonData = (Map<String, Object>)JSON.deserializeUntyped(strResponse);
         }
         if(!newsJsonData.isEmpty()){
+            system.debug('strResponse----------      '+ newsJsonData);
             return newsJsonData;
         } else {
             return null;
