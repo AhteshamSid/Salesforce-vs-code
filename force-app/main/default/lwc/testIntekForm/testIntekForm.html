@@ -1,0 +1,49 @@
+<template>
+    <!-- sldsValidatorIgnore -->
+    <!-- 
+    <div class="slds-section slds-is-open" id="ContactInformation">
+        <h3 class="slds-section__title" onclick={toggleSection}>
+            <button aria-controls="expando-unique-id" aria-expanded="true" class="slds-button slds-section__title-action slds-section-title" >
+                <lightning-icon icon-name="utility:switch" alternative-text="switch" size="x-small" class="slds-section__title-action-icon slds-button__icon_left"></lightning-icon>
+                <span class="slds-truncate" title="Contact Information">Contact Information</span>
+            </button>
+        </h3>
+
+        <div aria-hidden="false" class="slds-section__content slds-p-around_small">
+            <c-cont-sec ></c-cont-sec>
+        </div>
+
+    </div>
+-->
+<header class="slds-modal__header">
+    <h2 class="slds-modal__title slds-hyphenate">Client Intake Form</h2>
+</header>
+		
+    <lightning-accordion allow-multiple-sections-open
+                                        active-section-name={activeSections}
+                                        class="slds-theme_shade slds-theme_alert-texture">
+            <lightning-accordion-section name="A" label="Contact Information" >
+                <c-cont-sec ></c-cont-sec>
+               
+            </lightning-accordion-section>
+    
+            <lightning-accordion-section name="B" label="Primary Individual Billing Address" >
+                <p>This is the content area for Primary Individual Billing Address.</p>
+            </lightning-accordion-section>
+    
+            <lightning-accordion-section name="C" label="Package Selection" >
+                <p>This is the content area for Package Selection.</p>
+            </lightning-accordion-section>
+        </lightning-accordion>
+
+
+        <footer class="slds-modal__footer">
+            <lightning-button label="Submit As Sale" disabled variant="brand" class="slds-m-right_x-small"></lightning-button>
+            <lightning-button label="Save as Lead" variant="brand" class="slds-m-right_x-small"></lightning-button>
+            <lightning-button label="Mark Dead" variant="brand" class="slds-m-right_x-small" style="float:left;"></lightning-button>
+        </footer>
+    
+    
+
+        <lightning-spinner if:true={isLoading} alternative-text="Loading" size="medium" variant="brand"></lightning-spinner>
+</template>

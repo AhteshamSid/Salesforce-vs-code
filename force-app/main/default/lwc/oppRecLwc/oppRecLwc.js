@@ -1,4 +1,3 @@
-
 import { LightningElement, wire } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import oppRec from '@salesforce/apex/OppRecordType.oppRec';

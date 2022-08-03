@@ -34,4 +34,5 @@ export default class ActivityCompLwc extends NavigationMixin(LightningElement) {
     } 
     
     cC = col;
+    df=[]
 }

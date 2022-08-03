@@ -1,6 +1,7 @@
 import { LightningElement, wire} from 'lwc';
 import ContactList from '@salesforce/apex/AccountHandler.ContactList';
 import AccountList from '@salesforce/apex/AccountHandler.AccountList';
+import retriveSquare from '@salesforce/apex/squareAPI.retriveSquare';
 import {refreshApex} from '@salesforce/apex';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import {updateRecord} from 'lightning/uiRecordApi'
@@ -95,4 +96,11 @@ export default class AccountContactsPopupList extends LightningElement {
             })
         )
     }
+		
+		
+    @wire(retriveSquare) btn;
+		conectedcallback(){
+				console.log('btn======>' + btn.data);
+		}
+		
 }

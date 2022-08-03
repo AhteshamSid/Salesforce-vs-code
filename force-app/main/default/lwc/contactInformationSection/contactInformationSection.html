@@ -1,0 +1,45 @@
+<template>
+    <div if:true={contact} class="slds-form">
+        <div class="slds-form__row">
+            <div class="slds-form__item" role="listitem">
+                <div class="slds-form-element_stacked slds-clearfix">
+                    <label class="slds-form-element__label slds-float_left" >First Name</label>
+                    <lightning-input type="text" name="FirstName" data-name="FirstName" required label="First Name" variant="label-hidden" onchange={handleChange} value={_contact.FirstName}  onblur={validateFirstName}></lightning-input>
+                </div>
+            </div>
+            <div class="slds-form__item" role="listitem">
+                <div class="slds-form-element_stacked slds-clearfix">
+                    <label class="slds-form-element__label slds-float_left" >Middle Name</label>
+                    <lightning-input type="text" name="MiddleName" data-name="MiddleName" label="Middle Name" variant="label-hidden" value={_contact.MiddleName} onchange={handleChange} onblur={validateMiddleName}></lightning-input>
+                </div>
+            </div>
+        </div>
+        
+        <div class="slds-form__row">
+            <div class="slds-form__item" role="listitem">
+                <div class="slds-form-element_stacked slds-clearfix">
+                     <label class="slds-form-element__label slds-float_left" >Last Name</label>
+                    <lightning-input type="text" name="LastName" data-name="LastName" required label="Last Name" variant="label-hidden" value={_contact.LastName}  onchange={handleChange} onblur={validateLastName}></lightning-input>
+                </div>
+            </div>
+            <div class="slds-form__item" role="listitem">
+                <div class="slds-form-element_stacked slds-clearfix">
+                    <label class="slds-form-element__label slds-float_left" >Suffix</label>
+                    <lightning-input type="text" name="Suffix" data-name="Suffix" label="Suffix" variant="label-hidden" value={_contact.Suffix} onchange={handleChange} onblur={validateSuffix}></lightning-input>
+                </div>
+            </div>
+        </div>
+        <div if:true={isPrimary} class="slds-form__row">
+            <div class="slds-form__item" role="listitem">
+                <div class="slds-form-element_stacked slds-clearfix">
+                    <label class="slds-form-element__label slds-float_left" >Referred By</label>
+                    <c-lookup objecttype="RefferedBy" searchagainst="Name" label="Referred By" variant="label-hidden" lookupicon="standard:contact" selected-id={referredById} selected-name={referredByName} onselection={handleReferredBySelection}></c-lookup>
+                </div>
+            </div>
+            <div class="slds-form__item" role="listitem">
+                <div class="slds-form-element_stacked">
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

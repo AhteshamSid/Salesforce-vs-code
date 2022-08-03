@@ -1,0 +1,19 @@
+<template>
+   
+
+    <lightning-card>
+        <div class="slds-p-around_small">
+            <lightning-dual-listbox name="languages"
+                                    label="Key Contacts"
+                                    source-label="Available"
+                                    selected-label="Selected"
+                                    field-level-help="Select your related contacts with account"
+                                    options={getOptions}
+                                    onchange={handleChange}></lightning-dual-listbox>
+                                    <br/>
+                                    <div class="slds-box" >
+                                        <p>Selected values are: {selected}</p>
+                                    </div>
+        </div>
+    </lightning-card>
+</template>

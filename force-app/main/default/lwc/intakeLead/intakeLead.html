@@ -1,0 +1,359 @@
+<!-- *******************************************************************************************
+* @Name         intakeLead
+* @Author       Sachin Kumar 
+* @Date         09/26/2021
+* @Description  This component is used as both Intake Lead and Intake Contact Based on Context 
+*******************************************************************************************/
+/* MODIFICATION LOG
+* Version          Developer          Date               Description
+*-------------------------------------------------------------------------------------------
+*  1.0              Sachin Kumar             09/26/2021       Initial Creation 
+*  1.1              Ankit Saxena             01/04/2022       Filter out packages based on Negative Count on contact
+*  1.2              Ankit Saxena             03/22/2022       Credit card duplicacy validations
+******************************************************************************************* -->
+<template>
+
+    <div class="slds-modal__content" style="height:calc(100vh - 160px);overflow:auto;">
+        <header class="slds-modal__header">
+            <h2 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Client Intake Form</h2>
+        </header>
+
+        <div if:true={isOpportunityCancelled}>
+            <div class="slds-align_absolute-center" style="height:calc(100vh - 225px);font-size:17px;font-weight:500; text-align: center;">
+                Opportunity is cancelled.<br/>
+                To use Intake Form , client must be first re-enrolled through Re-enroll button.
+            </div>  
+        </div>
+        <div if:true={isDataLoaded} class="slds-p-around_medium">
+            
+            <!--This toast message will be visible only when we are using forms from callscript as Toast event doesnt ork when lwc is embedded inside VF -->
+            <div data-id="redDiv">
+            <c-custom-Toast message ={customToastMessage}  variant={customToastvariant} auto-close="true" ></c-custom-Toast>
+            </div>
+            
+            <c-modal-popup if:true={formData.isLeadConverted} confirm-button-label="Go to Contact" show-confirm-only="true" oncancel={navigateToContact} onconfirmation={navigateToContact}>
+                <span slot="header">
+                    <h2 class="slds-modal__title slds-hyphenate slds-is-converted">WARNING</h2>
+                </span>
+                <span slot="body">
+                    <p class="slds-is-converted">THIS LEAD HAS ALREADY BEEN CONVERTED !!!.</p>
+                    <div class="slds-m-top_medium"><a onclick={navigateToContact}>{formData.primaryContact.FirstName} {formData.primaryContact.LastName}</a></div>
+                </span>
+            </c-modal-popup>
+            
+            <div if:true={isOpportunityActive} class="slds-notify slds-notify_alert" role="alert">
+                <span class="slds-assistive-text">info</span>
+                    <span class="slds-icon_container slds-icon-utility-user slds-m-right_x-small" title="Description of icon when needed">
+                    <lightning-icon icon-name="utility:info" variant="inverse" alternative-text="info" size="x-small" ></lightning-icon>
+                </span>
+                <h2>Active opportunity already exists: <a onclick={navigateToOpportunity}>{formData.opp.Name}</a></h2>
+            </div>
+
+            <!-- ContactInformation Section -->
+            <div class="slds-section slds-is-open" id="ContactInformation">
+                <h3 class="slds-section__title" onclick={toggleSection}>
+                    <button aria-controls="expando-unique-id" aria-expanded="true" class="slds-button slds-section__title-action slds-section-title" >
+                        <lightning-icon icon-name="utility:switch" alternative-text="switch" size="x-small" class="slds-section__title-action-icon slds-button__icon_left"></lightning-icon>
+                        <span class="slds-truncate" title="Contact Information">Contact Information</span>
+                    </button>
+                </h3>
+                
+                <div aria-hidden="false" class="slds-section__content slds-p-around_small">
+                    <c-contact-information-section data-cmptype="primary" contact={formData.primaryContact} is-primary="true"></c-contact-information-section>
+                </div>
+
+                
+            </div>  
+            <!-- ContactInformation Section End-->
+
+            <!-- Billing address Information Section -->
+            <div class="slds-section slds-is-open" id="PrimaryIndividualBillingAddress">
+                <h3 class="slds-section__title" onclick={toggleSection}>
+                    <button aria-controls="expando-unique-id" aria-expanded="true" class="slds-button slds-section__title-action slds-section-title" >
+                        <lightning-icon icon-name="utility:switch" alternative-text="switch" size="x-small" class="slds-section__title-action-icon slds-button__icon_left"></lightning-icon>
+                        <span class="slds-truncate" title="Primary Individual Billing Address">Primary Individual Billing Address</span>
+                    </button>
+                </h3>
+                
+                <div aria-hidden="false" class="slds-section__content slds-p-around_small">
+                    <c-billing-information-section 
+                        form-type="INTAKE_FORM" 
+                        data-cmptype="primary" 
+                        is-primary="true"
+                        is-intake-lead={isIntakeLead}
+                        contact={formData.primaryContact} 
+                        record-id={recordId}
+                        ontransunionrequest={handleMakingTranunionRequest}
+                        onuniquevalidation={validateContactAgainstEachOther}
+                        onaddresschange={refreshAvailableProductList}
+                        formsource={source}>
+                        <button slot="familyAddOnButton" if:true={isIntakeContactIndividual} type="button" class="slds-button slds-button_brand slds-m-right_xx-small" data-actiontype="ADD_FAMILY_MEMBER" onclick={showPackageChangeConfirmation}>Family Add-On</button>
+                    </c-billing-information-section>
+                </div>
+            </div>  
+            <!-- Billing address Information Section End-->
+
+
+            <!-- Spouse Information Section -->
+            <div if:true={isCoupleSubscription} class="slds-section slds-is-open spouse-information_section" id="SpouseInformation">
+                <h3 class="slds-section__title" onclick={toggleSection}>
+                    <button aria-controls="expando-unique-id" aria-expanded="true" class="slds-button slds-section__title-action slds-section-title" >
+                        <lightning-icon icon-name="utility:switch" alternative-text="switch" size="x-small" class="slds-section__title-action-icon slds-button__icon_left"></lightning-icon>
+                        <span class="slds-truncate" title="Family Member Information" style="width:100%;">Family Member Information
+                            <a  if:true={isSpouseSearchButtonVisible} style="font-size: 16px;float:right;margin-right: 2rem;" onclick={startSpouseSearchProcess}>Search Family Member</a>
+                        </span>
+                    </button>
+                </h3>
+                
+                <div aria-hidden="false" class="slds-section__content slds-p-around_small">   
+                    
+                    <c-contact-information-section data-cmptype="spouse" contact={formData.spouseContact}></c-contact-information-section>
+
+                    <c-billing-information-section 
+                        form-type="INTAKE_FORM" 
+                        data-cmptype="spouse"
+                        is-intake-lead={isIntakeLead}
+                        record-id={recordId}
+                        is-opportunity-active={isOpportunityActive}
+                        contact={formData.spouseContact} 
+                        oncopyingprimaryaddress={copyPrimaryaddressToSpouse} 
+                        onmakingprimary={handleMakingPrimary}
+                        ontransunionrequest={handleMakingTranunionRequest} 
+                        onuniquevalidation={validateContactAgainstEachOther}
+                        formsource={source}>
+                    </c-billing-information-section>
+                </div>
+            </div> 
+            <!-- Spouse Information Section End-->
+
+
+            <!-- Product Selection Section -->
+            <div class="slds-section slds-is-open" id="PackageSelection">
+                <h3 class="slds-section__title" onclick={toggleSection}>
+                    <button aria-controls="expando-unique-id" aria-expanded="true" class="slds-button slds-section__title-action slds-section-title" >
+                        <lightning-icon icon-name="utility:switch" alternative-text="switch" size="x-small" class="slds-section__title-action-icon slds-button__icon_left"></lightning-icon>
+                        <span class="slds-truncate" title="Package Selection">Package Selection</span>
+                    </button>
+                </h3>
+                
+                <div aria-hidden="false" class="slds-section__content slds-p-around_small">
+                    
+                    <div class="slds-form__row">
+                        <div class="slds-form__item" role="listitem">
+                            <div class="slds-form-element_stacked slds-clearfix">
+                                <label class="slds-form-element__label slds-float_left">Product Selection</label>
+                                <c-combobox label="Product Selection" variant="label-hidden" disabled={isOpportunityActive} data-type="ProductType" options={productTypeOptions} value={formData.selectedPackage.ProductType} onchange={handleProductTypeOptionChange}></c-combobox>
+                            </div>
+                        </div>
+
+                        <div class="slds-form__item" role="listitem">
+                            <div class="slds-form-element_stacked slds-clearfix">
+                                 <label class="slds-form-element__label slds-float_left">Is this for an individual or Family Plan?</label>
+                                <c-combobox disabled={isIntakeContact} label="Is this for an individual or Family Plan?" variant="label-hidden" options={individualOrCoupleOptions} value={formData.selectedPackage.IndividualOrCouple} onchange={handleIndividualOrCoupleChange}></c-combobox>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="slds-form__row">
+                        <div class="slds-form__item" role="listitem">
+                            <div class="slds-form-element_stacked slds-clearfix">
+                                <label class="slds-form-element__label slds-float_left">Select Package</label>
+                                <c-combobox data-type="PackageOptions" label="Select Package" variant="label-hidden" disabled={isOpportunityActive}  options={formData.upgradedPackages} value={formData.selectedPackage.ProductId} onchange={handlePackageChange} ></c-combobox>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="slds-form__row">
+                        <div class="slds-form__item" role="listitem">
+                            <div class="slds-form-element_stacked slds-clearfix">
+                                <label class="slds-form-element__label slds-float_left">2nd Fee Charge Date</label>
+                                <lightning-input if:true={isSecondSetupFeeEnabled} type="date" data-type="SetupFee2_Date__c"  date-style="short" name="SetupFee2_Date__c" label="2nd Fee Charge Date" variant="label-hidden" value={formData.opp.SetupFee2_Date__c} onchange={validate2ndSetupDate}></lightning-input>
+                                <lightning-input if:false={isSecondSetupFeeEnabled} disabled type="date" date-style="short" name="SetupFee2_Date__c" label="2nd Fee Charge Date" variant="label-hidden" value={formData.opp.SetupFee2_Date__c}></lightning-input>
+                            </div>
+                        </div>
+
+                        <div class="slds-form__item" role="listitem">
+                            <div class="slds-form-element_stacked slds-clearfix">
+                                <label class="slds-form-element__label slds-float_left">Recurring Charge Date</label>
+                                <c-combobox data-type="chargedate" label="Recurring Charge Date" variant="label-hidden" options={recurringChargeDateOptions} value={formData.opp.Charge_Date__c} onchange={validateRecurringChargeDate}></c-combobox>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="slds-form__row">
+                        <div class="slds-form__item" role="listitem">
+                            <div class="slds-form-element_stacked slds-clearfix">
+                                 <label class="slds-form-element__label slds-float_left">Initial fee</label>
+                                <lightning-input disabled class="initialFee" type="number" formatter="currency" step="0.01" label="Initial fee" variant="label-hidden" value={formData.selectedPackage.InitialFee}></lightning-input>
+                            </div>
+                        </div>
+
+                        <div class="slds-form__item" role="listitem">
+                            <div class="slds-form-element_stacked slds-clearfix">
+                                <label class="slds-form-element__label slds-float_left">Enrollment Balance</label>
+                                <lightning-input class="initialFee1" disabled type="number" formatter="currency" step="0.01" label="Enrollment Balance" variant="label-hidden" value={formData.opp.enrollment_balance__c}></lightning-input>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div if:false={isIntakeLead} class="slds-m-top_medium slds-align_center">
+                        <template if:true={isCoupleSubscription}>
+                            <button type="button" class="slds-button slds-button_brand slds-m-right_xx-small" data-actiontype="REMOVE_FAMILY_MEMBER" onclick={showPackageChangeConfirmation}>Remove Family Member</button>
+                        </template>
+
+                        <template if:false={isCoupleSubscription}>
+                            <button type="button" class="slds-button slds-button_brand slds-m-right_xx-small" data-actiontype="ADD_FAMILY_MEMBER" onclick={showPackageChangeConfirmation}>Family Add-On</button>
+                        </template>
+                    </div>
+                </div>
+            </div>  
+            <!-- Product Selection Section End-->
+
+
+            <!-- First Credit Card Section -->
+            <div class="slds-section slds-is-open" id="CreditCardInformation">
+                <h3 class="slds-section__title" onclick={toggleSection}>
+                    <button aria-controls="expando-unique-id" aria-expanded="true" class="slds-button slds-section__title-action slds-section-title" >
+                        <lightning-icon icon-name="utility:switch" alternative-text="switch" size="x-small" class="slds-section__title-action-icon slds-button__icon_left"></lightning-icon>
+                        <span class="slds-truncate" title="Credit Card Information">Credit Card Information</span>
+                    </button>
+                </h3>
+                
+                <div aria-hidden="false" class="slds-section__content slds-p-around_small">
+                    <c-credit-card-section is-intake-lead={isIntakeLead} data-type="firstcard" form-type="INTAKE_LEAD" credit-card-info={formData.creditCardInfo} onsecondcardchange={handleSecondCardSelection} onrecurringchange={handleRecurringCardChange} onprimarycardselect={handlePrimaryCardSelect} opportunityid={formData.opp.Id}></c-credit-card-section>
+                </div>
+            </div>  
+            <!-- First Credit Card Section End-->
+
+
+            <!-- Second Card Section -->
+            <div if:true={useSecondCreditCard} class="slds-section slds-is-open" id="2ndCreditCardInformation">
+                <h3 class="slds-section__title" onclick={toggleSection}>
+                    <button aria-controls="expando-unique-id" aria-expanded="true" class="slds-button slds-section__title-action slds-section-title" >
+                        <lightning-icon icon-name="utility:switch" alternative-text="switch" size="x-small" class="slds-section__title-action-icon slds-button__icon_left"></lightning-icon>
+                        <span class="slds-truncate" title="2nd Credit Card Information">2nd Credit Card Information</span>
+                    </button>
+                </h3>
+                
+                <div aria-hidden="false" class="slds-section__content slds-p-around_small">
+                    <c-credit-card-section is-intake-lead={isIntakeLead}  data-type="secondcard" form-type="INTAKE_LEAD" credit-card-info={formData.secondCreditCardInfo} primary-credit-card-info={formData.creditCardInfo} is-second-card="true" onrecurringchange={handleRecurringCardChange} opportunityid={formData.opp.Id}></c-credit-card-section>
+                </div>
+            </div>  
+            <!-- Second Card Section End-->
+
+        </div>
+    </div>
+
+    <footer class="slds-modal__footer">
+        <button if:true={isSubmitAsSaleEnabled} class="slds-button slds-button_brand slds-m-right_xx-small" data-actiontype="SUBMIT_AS_SALE" onclick={validateForm}>Submit as Sale</button>
+        <button if:false={isSubmitAsSaleEnabled} disabled class="slds-button slds-button_brand slds-m-right_xx-small">Submit as Sale</button>
+
+        <template if:true={isIntakeContact}>
+            <button if:true={isChargeSetupFeeButtonEnabled} class="slds-button slds-button_brand slds-m-right_xx-small" data-actiontype="CHARGE_2NDSETUP_FEE" onclick={validateForm}>Charge 2nd Setup Fee</button>
+            <button if:false={isChargeSetupFeeButtonEnabled} disabled class="slds-button slds-button_brand slds-m-right_xx-small">Charge 2nd Setup Fee</button>
+        </template>
+
+        <template if:true={isIntakeLead}>
+            <button class="slds-button slds-button_brand slds-m-right_xx-small" data-actiontype="SAVE_AS_LEAD" onclick={validateForm}>Save as Lead</button>
+        </template>
+
+        <template if:false={isIntakeLead}>
+            <button if:true={isSaveEnabled} class="slds-button slds-button_brand slds-m-right_xx-small" data-actiontype="SAVE_AS_LEAD" onclick={validateForm}>Save</button>
+            <button if:false={isSaveEnabled} disabled class="slds-button slds-button_brand slds-m-right_xx-small">Save</button> 
+        </template>
+        
+        
+        <button if:false={isOpportunityActive} class="slds-button slds-button_brand slds-m-right_xx-small" style="float:left;" data-actiontype="MARK_DEAD" onclick={startMarkingDead}>Mark Dead</button>
+    </footer>
+
+
+    <lightning-spinner if:true={isLoading} alternative-text="Loading" size="medium" variant="brand"></lightning-spinner>
+
+
+    <c-modal-popup  if:true={showMarkDeadModal} confirm-button-label="Confirm" oncancel={cancelMarkingDead} onconfirmation={commitRecordAsDead} formsource={source}>
+        <span slot="header" >Mark Dead</span>
+        <span if:true={isIntakeLead} slot="body">Are you sure you want to mark the lead as dead ?</span>
+        <span if:false={isIntakeLead} slot="body">
+            <div class="slds-align_left">
+                <div class="slds-notify slds-notify_alert slds-alert_warning" role="alert">
+                    <span class="slds-assistive-text">warning</span>
+                    <span class="slds-icon_container slds-icon-utility-warning slds-m-right_x-small" title="Description of icon when needed">
+                        <lightning-icon icon-name="utility:warning" alternative-text="warning" size="x-small"></lightning-icon>
+                    </span>
+                    <h2>This will mark the opportunity as dead and will no longer be considered a working warm lead</h2>
+                </div>
+                <div class="slds-form__row slds-p-top_medium">
+                    <div class="slds-form__item" role="listitem">
+                        <div class="slds-form-element_stacked">
+                            <lightning-input disabled type="text" label="Stage" value={formData.opp.StageName__c}></lightning-input>
+                        </div>
+                    </div>
+
+                    <div class="slds-form__item" role="listitem">
+                        <div class="slds-form-element_stacked">
+                            <c-combobox label="Select Package" options={closedLostReasons} value={formData.opp.Closed_Lost_Reasons__c} onchange={handleOppClosedReasonChange}></c-combobox>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slds-form__row">
+                    <div class="slds-form__item" role="listitem">
+                        <div class="slds-form-element_stacked">
+                            <lightning-textarea name="Description" label="Description" value={formData.opp.Description__c} placeholder="type here..." onchange={handleOppDescriptionChange}></lightning-textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </span>
+    </c-modal-popup>
+
+    <c-modal-popup if:true={showPackageChangeConfirmationModal} oncancel={hidePackageChangeConfirmation} onconfirmation={managePackageChangeConfirmation} formsource={source}>
+        <span slot="header">{packageChangeModalHeader}</span>
+        <span slot="body">Package option was changed. Please confirm change.</span>
+    </c-modal-popup>
+
+    <c-modal-popup  if:true={showMakePrimaryconfirmation} oncancel={cancelMakePrimaryconfirmation} onconfirmation={confirmMakingPrimary} formsource={source}>
+        <span slot="header">Make Primary?</span>
+        <span slot="body">{makePrimaryConfirmationBody}</span>
+    </c-modal-popup>
+
+    <c-modal-popup  if:true={showBinBlockCardModal} confirm-button-label="Agrees" oncancel={redirectBackToParent} onconfirmation={submitNewCardAfterBlock} formsource={source}>
+        <span slot="header"><lightning-icon icon-name="utility:warning" variant="error" size="small"></lightning-icon></span>
+        <span slot="body">Unfortunately, we do not accept this card. Do you have another card we can use to get started?</span>
+    </c-modal-popup>
+
+    <c-modal-popup  if:true={showDoNotHonurModal} oncancel={hideDoNotHonurModal} onconfirmation={resendAfterDoNotHonorResponse} formsource={source} nobutton="false">
+        <span slot="header">Transaction Failed</span>
+        <span slot="body">
+            <span style="font-size: 1rem;color:red;font-weight: bold;">DO NOT HONOR! </span> <br/>
+            <span style="font-size: 1rem;color:red;font-weight: bold;">
+                "The gateway declined this attempt, however we are re attempting, await a few seconds before notifying client"
+            </span> <br/>
+        </span>
+    </c-modal-popup>
+
+    <c-modal-popup  if:true={showTransactionFailedModal} nobutton="true" confirm-button-label="Agrees" oncancel={hideTransactionFailedModal} onconfirmation={agreesTransactionFailedModal} formsource={source}>
+        <span slot="header">Transaction Failed <lightning-icon icon-name="utility:close" variant="error" size="small"></lightning-icon></span>
+        <span slot="body">{transactionErrorMessage}</span>
+    </c-modal-popup>
+
+    <c-modal-popup  if:true={isRecordSavedSuccessfully} is-intake-lead={isIntakeLead} show-confirm-only="true"  nobutton="true" confirm-button-label="Agrees" oncancel={hideRecordUpdateModal} onconfirmation={agreesTransactionFailedModal} formsource={source}>
+        <span slot="header">Record Update</span>
+        <span slot="body">
+            <span style="font-size: 1rem;color:green;font-weight: bold;">
+                Record updated successfully!          
+            </span> <br/>
+        </span>
+    </c-modal-popup>
+
+    <c-modal-popup  if:true={showWelcomeToTheProgrammeModal} is-intake-lead={isIntakeLead} nobutton="true" confirm-button-label="Ok" show-confirm-only="true" oncancel={redirectToCallScriptOrNot} onconfirmation={navigateToOpportunity} formsource={source} >
+        <span slot="header">Transaction Successfull <lightning-icon icon-name="utility:success" variant="success" size="small"></lightning-icon></span>
+        <span slot="body"><p><span style="font-size: 1.5rem;">Thank You!</span> <span style="color: green;font-size: 1.5rem;margin-left:0.2rem;">Welcome to the Program.</span></p></span>
+    </c-modal-popup>
+
+    <c-spouse-search if:true={showSpouseSeachComponent} oncancel={cancelSpouseSearchProcess} onspouseselection={handleSpouseSelection} formsource={source}></c-spouse-search>
+
+    <c-cst-owner-selection if:true={showCstOwnerScreen} oncancel={cancelCSTSelection} onsubmission={submitCSTAndForm} formsource={source}></c-cst-owner-selection>
+    
+    
+</template>

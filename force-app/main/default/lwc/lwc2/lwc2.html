@@ -1,0 +1,55 @@
+<template>
+    <lightning-card title="Child to Parent">
+        <li>{burn}</li>
+        <c-lwc1 onburn={changeHandler}></c-lwc1>
+    </lightning-card>
+
+    <lightning-card title="Opportunities with columns data key-field" >
+    <lightning-datatable
+        key-field="Id"
+        data={oL}
+        columns={fields}
+    ></lightning-datatable>
+    </lightning-card>
+    <lightning-card title="Opportunity with for loop">
+        <template if:true={err}>
+            <h2> Error Occurred</h2>
+        </template>
+        <template for:each={oL} for:item="o">
+            <li key={o.Id}>
+                {o.Name}
+            </li>
+        </template>
+    </lightning-card>
+    <lightning-card title="Opportunity with Itreator">
+        <template if:true={err}>
+            <h2> Error Occurred</h2>
+        </template>
+        <template iterator:o={oL}>
+            <li key={o.value.Id}>
+                {o.value.Name}
+            </li>
+        </template>
+    </lightning-card>
+    
+
+    <lightning-card title="LDS">
+        <lightning-record-form
+            object-api-name="Opportunity"
+            record-id={recordId}
+            layout-type="Compact"
+            ></lightning-record-form>
+    </lightning-card>
+
+
+    <lightning-card title="create">
+        <lightning-record-form
+            object-api-name="Opportunity"
+            fields={flds}
+            ></lightning-record-form>
+    </lightning-card>
+    
+    
+    
+    
+</template>

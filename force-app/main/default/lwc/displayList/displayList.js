@@ -37,7 +37,7 @@ export default class DisplayList extends NavigationMixin(LightningElement) {
 
 
     burn = "hi dude"
-    bb = "hi dude"  
+    bb = "hi dude"
     changeHandler(event){
         this.burn = event.detail;
     }
