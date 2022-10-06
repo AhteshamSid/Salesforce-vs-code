@@ -8,7 +8,7 @@ public with sharing class FileUploaderClass {
         for (ContentDocumentLink cdl : cdls) {
             documentIds.add(cdl.ContentDocumentId);
         }
-        return [SELECT Id, Title, ContentSize, FileExtension, CreatedDate, ContentDocumentId from ContentVersion where ContentDocumentId in:documentIds];
+        return [SELECT Id, Title, ContentSize, FileExtension, CreatedDate, ContentDocumentId, recordSize__c from ContentVersion where ContentDocumentId in:documentIds];
     }
 
     @AuraEnabled(Cacheable = true)
@@ -23,6 +23,8 @@ public with sharing class FileUploaderClass {
         for (ContentDocumentLink cdl : cdls) {
             documentIds.add(cdl.ContentDocumentId);
         }
-        return [SELECT Id, Title, ContentSize, FileExtension, CreatedDate, ContentDocumentId from ContentVersion where tt_fileupload__c like :val and ContentDocumentId in:documentIds];
+        return [SELECT Id, Title, ContentSize, FileExtension, CreatedDate, ContentDocumentId, recordSize__c from ContentVersion where tt_fileupload__c like :val and ContentDocumentId in:documentIds];
     }
+
 }
+
