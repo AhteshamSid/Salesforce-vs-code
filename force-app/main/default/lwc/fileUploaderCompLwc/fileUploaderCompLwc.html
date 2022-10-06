@@ -1,3 +1,4 @@
+<!-- sldsValidatorIgnore -->
 <template>
 
 
@@ -42,8 +43,16 @@
             </lightning-layout-item>
             </template>
         </lightning-card>
-    
-
+    <!-- sldsValidatorIgnoreNextLine -->
+        
+    <lightning-datatable
+        key-field="id"
+        data={uploadFile.data}
+        show-row-number-column
+        hide-checkbox-column
+        columns={columns}
+        onrowaction={handleRowAction}>
+    </lightning-datatable>
 
     </lightning-card>
 </template>
